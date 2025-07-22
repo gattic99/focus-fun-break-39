@@ -51,7 +51,7 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
     const loadAudio = () => {
       try {
         if (!audioRef.current) {
-          const audioPath = getExtensionURL('/assets/office-ambience.mp3');
+          const audioPath = '/assets/office-ambience.mp3';
           console.log("Loading audio from path:", audioPath);
           
           audioRef.current = new Audio(audioPath);
@@ -237,12 +237,9 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
       </div>
       
       <div className="flex justify-center mt-4 mb-6">
-        {gameState.gameOver ? <button onClick={resetGame} className="bg-focus-purple text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-colors mr-4">
+        {gameState.gameOver ? <button onClick={resetGame} className="bg-focus-purple text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-colors">
             Play Again
           </button> : null}
-        <button onClick={handleReturn} className="bg-white text-focus-purple border border-focus-purple px-6 py-2 rounded-full hover:bg-focus-purple hover:text-white transition-colors">
-          Exit Game
-        </button>
       </div>
     </div>
   );
