@@ -2,21 +2,28 @@
 import { Coin } from "@/types/gameTypes";
 import { getExtensionURL } from "../chromeUtils";
 
-// Create coin images array
+// Create coin images array with your uploaded images
 const coinImages: HTMLImageElement[] = [];
 
-// Initialize all coin images
-for (let i = 1; i <= 4; i++) {
+// Initialize all coin images with your exact uploaded images
+const imageUrls = [
+  '/lovable-uploads/d5931b60-291a-4967-acb2-049519d47f35.png',
+  '/lovable-uploads/d693ce1c-58d1-408f-a910-ba27104f2c60.png',
+  '/lovable-uploads/fc039335-e6e1-4cc5-b0ed-fd8592e45e65.png',
+  '/lovable-uploads/edb454cb-c8f0-4c8f-8841-bcba6bd5fa15.png'
+];
+
+imageUrls.forEach((url, i) => {
   const img = new Image();
   img.onload = () => {
-    console.log(`Coin image ${i} loaded successfully`);
+    console.log(`Coin image ${i + 1} loaded successfully`);
   };
   img.onerror = (err) => {
-    console.error(`Error loading coin image ${i}:`, err);
+    console.error(`Error loading coin image ${i + 1}:`, err);
   };
-  img.src = getExtensionURL(`/assets/coin-${i}.png`);
+  img.src = url;
   coinImages.push(img);
-}
+});
 
 // Draw collectibles with variety
 export const drawCollectibles = (
