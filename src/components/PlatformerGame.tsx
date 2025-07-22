@@ -49,10 +49,21 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
   // Initialize audio
   useEffect(() => {
     const loadAudio = () => {
-      try {
+        try {
         if (!audioRef.current) {
           const audioPath = '/assets/office-ambience.mp3';
-          console.log("Loading audio from path:", audioPath);
+          console.log("Attempting to load audio from:", audioPath);
+          
+          // Check if file exists first
+          fetch(audioPath, { method: 'HEAD' })
+            .then(response => {
+              if (!response.ok) {
+                console.error("Audio file not found at:", audioPath, "Status:", response.status);
+              } else {
+                console.log("Audio file exists at:", audioPath);
+              }
+            })
+            .catch(err => console.error("Failed to check audio file:", err));
           
           audioRef.current = new Audio(audioPath);
           audioRef.current.volume = 0.2;  // Lower volume
