@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { formatTime } from "@/utils/timerUtils";
 import { TimerState } from "@/types";
@@ -8,14 +7,12 @@ import { drawBackground, drawPlatforms, drawObstacles, drawCollectibles, drawCha
 import { initialCharacter, initialPlatforms, initialObstacles, initialCoins } from "@/data/gameData";
 import { toast } from "sonner";
 import { getExtensionURL } from "@/utils/chromeUtils";
-
 interface PlatformerGameProps {
   onReturn: () => void;
   timerState?: TimerState;
   onStart?: () => void;
   onPause?: () => void;
 }
-
 const PlatformerGame: React.FC<PlatformerGameProps> = ({
   onReturn,
   timerState,
@@ -27,7 +24,6 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const gameLoopRef = useRef<number | null>(null);
-  
   const {
     gameState,
     gameStarted,
@@ -49,31 +45,28 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
   // Initialize audio
   useEffect(() => {
     const loadAudio = () => {
-        try {
+      try {
         if (!audioRef.current) {
           const audioPath = '/assets/office-ambience.mp3';
           console.log("Attempting to load audio from:", audioPath);
-          
+
           // Check if file exists first
-          fetch(audioPath, { method: 'HEAD' })
-            .then(response => {
-              if (!response.ok) {
-                console.error("Audio file not found at:", audioPath, "Status:", response.status);
-              } else {
-                console.log("Audio file exists at:", audioPath);
-              }
-            })
-            .catch(err => console.error("Failed to check audio file:", err));
-          
+          fetch(audioPath, {
+            method: 'HEAD'
+          }).then(response => {
+            if (!response.ok) {
+              console.error("Audio file not found at:", audioPath, "Status:", response.status);
+            } else {
+              console.log("Audio file exists at:", audioPath);
+            }
+          }).catch(err => console.error("Failed to check audio file:", err));
           audioRef.current = new Audio(audioPath);
-          audioRef.current.volume = 0.2;  // Lower volume
+          audioRef.current.volume = 0.2; // Lower volume
           audioRef.current.loop = true;
-          
           audioRef.current.addEventListener('canplaythrough', () => {
             console.log("Audio can play now");
             setAudioLoaded(true);
           });
-          
           audioRef.current.addEventListener('error', e => {
             console.error("Audio error:", e);
             const error = audioRef.current?.error;
@@ -81,7 +74,7 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
               console.error("Audio error code:", error.code, "message:", error.message);
             }
           });
-          
+
           // Try to preload the audio
           audioRef.current.load();
         }
@@ -89,16 +82,14 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
         console.error("Audio initialization error:", error);
       }
     };
-    
     loadAudio();
-    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = "";
         audioRef.current = null;
       }
-      
+
       // Clean up game loop
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
@@ -120,7 +111,6 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
           // We'll handle user interaction to play audio separately
         }
       };
-      
       playAudio();
     }
   }, [audioLoaded, gameStarted, audioPlaying]);
@@ -142,39 +132,30 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
   // Game loop using requestAnimationFrame for better performance
   useEffect(() => {
     if (!gameStarted) return;
-    
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Set up game loop using requestAnimationFrame
     let lastTimestamp = 0;
     const targetFPS = 60;
     const frameInterval = 1000 / targetFPS;
-    
     const runGameLoop = (timestamp: number) => {
       if (!lastTimestamp) lastTimestamp = timestamp;
-      
       const elapsed = timestamp - lastTimestamp;
-      
       if (elapsed > frameInterval) {
-        lastTimestamp = timestamp - (elapsed % frameInterval);
-        
+        lastTimestamp = timestamp - elapsed % frameInterval;
         if (!gameState.gameOver) {
           updateGame();
         }
         renderGame(ctx);
       }
-      
       if (gameStarted) {
         gameLoopRef.current = requestAnimationFrame(runGameLoop);
       }
     };
-    
     gameLoopRef.current = requestAnimationFrame(runGameLoop);
-    
     return () => {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
@@ -187,58 +168,44 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
   const renderGame = (ctx: CanvasRenderingContext2D) => {
     // Clear canvas first
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
     drawBackground(ctx, gameState.cameraOffsetX);
     drawPlatforms(ctx, platformsRef.current, gameState.cameraOffsetX);
     drawObstacles(ctx, obstaclesRef.current, gameState.cameraOffsetX);
     drawCollectibles(ctx, coinsRef.current, gameState.cameraOffsetX);
     drawCharacter(ctx, characterRef.current);
     drawUI(ctx, gameState, timerState?.timeRemaining || 0, timerState?.mode || 'focus');
-    
     if (gameState.gameOver) {
       drawGameOver(ctx, gameState.score);
     }
   };
-
   const handleReturn = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setAudioPlaying(false);
     }
-    
+
     // Clean up game loop
     if (gameLoopRef.current) {
       cancelAnimationFrame(gameLoopRef.current);
       gameLoopRef.current = null;
     }
-    
     onReturn();
   };
-
   const handleUserInteraction = () => {
     if (audioRef.current && audioLoaded && !audioPlaying) {
-      audioRef.current.play()
-        .then(() => {
-          setAudioPlaying(true);
-          console.log("Audio started playing after user interaction");
-        })
-        .catch(err => {
-          console.error("Failed to play audio after interaction:", err);
-        });
+      audioRef.current.play().then(() => {
+        setAudioPlaying(true);
+        console.log("Audio started playing after user interaction");
+      }).catch(err => {
+        console.error("Failed to play audio after interaction:", err);
+      });
     }
   };
-
-  return (
-    <div 
-      className="fixed inset-0 top-auto bottom-0 w-full h-screen bg-blue-100 z-[10000] flex flex-col items-center" 
-      onClick={handleUserInteraction}
-      onKeyDown={handleUserInteraction}
-      tabIndex={0}
-    >
+  return <div className="fixed inset-0 top-auto bottom-0 w-full h-screen bg-blue-100 z-[10000] flex flex-col items-center" onClick={handleUserInteraction} onKeyDown={handleUserInteraction} tabIndex={0}>
       <div className="text-center mt-4 mb-2">
         <h2 className="text-xl font-bold text-focus-purple">Office Escape 🏃🏼‍♂️‍➡️🏃🏼‍♀️‍➡️</h2>
-        <p className="text-muted-foreground text-sm font-semibold py-[8px] text-center max-w-4xl w-full mx-auto px-4">Dodge obstacles and collect coins—they're your colleagues, Sina and Cristina! Everything except coins and trees will take you out! You can also jump on the shelves—they are not obstacles! The more coins you collect, the higher your score!</p>
+        <p className="text-muted-foreground text-sm font-semibold py-[8px] text-center max-w-4xl w-full mx-auto px-4">Dodge obstacles and collect coins! Everything except coins, trees and windows will take you out! You can also jump on the shelves—they are not obstacles! The more coins you collect, the higher your score!</p>
       </div>
       
       <div className="relative w-full max-w-4xl mx-auto">
@@ -252,8 +219,6 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
             Play Again
           </button> : null}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default PlatformerGame;
