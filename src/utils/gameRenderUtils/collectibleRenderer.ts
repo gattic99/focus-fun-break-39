@@ -54,13 +54,18 @@ export const drawCollectibles = (
 
         // Create circular clipping path
         ctx.save();
+        
+        // Improve image rendering quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
         ctx.beginPath();
         ctx.arc(centerX, centerY, renderWidth / 2 - 1, 0, Math.PI * 2);
         ctx.clip();
 
-        // Draw the image within the clipping path
+        // Draw the image within the clipping path with higher quality
         const imageIndex = i % coinImages.length;
-        if (coinImages[imageIndex]) {
+        if (coinImages[imageIndex] && coinImages[imageIndex].complete) {
           ctx.drawImage(
             coinImages[imageIndex],
             centerX - renderWidth / 2,
