@@ -2,27 +2,21 @@
 import { Coin } from "@/types/gameTypes";
 import { getExtensionURL } from "../chromeUtils";
 
-// Create the face image outside the function to ensure it's only created once
-const sinaImage = new Image();
-// Add an onload handler to ensure the image is fully loaded before use
-sinaImage.onload = () => {
-  console.log("Coin image loaded successfully");
-};
-sinaImage.onerror = (err) => {
-  console.error("Error loading coin image:", err);
-};
-sinaImage.src = getExtensionURL("/assets/coin-sina.png");
+// Create coin images array
+const coinImages: HTMLImageElement[] = [];
 
-// Create the face image outside the function to ensure it's only created once
-const cristinaImage = new Image();
-// Add an onload handler to ensure the image is fully loaded before use
-cristinaImage.onload = () => {
-  console.log("Coin image loaded successfully");
-};
-cristinaImage.onerror = (err) => {
-  console.error("Error loading coin image:", err);
-};
-cristinaImage.src = getExtensionURL("/assets/coin-cristina.png");
+// Initialize all coin images
+for (let i = 1; i <= 4; i++) {
+  const img = new Image();
+  img.onload = () => {
+    console.log(`Coin image ${i} loaded successfully`);
+  };
+  img.onerror = (err) => {
+    console.error(`Error loading coin image ${i}:`, err);
+  };
+  img.src = getExtensionURL(`/assets/coin-${i}.png`);
+  coinImages.push(img);
+}
 
 // Draw collectibles with variety
 export const drawCollectibles = (
@@ -58,13 +52,16 @@ export const drawCollectibles = (
         ctx.clip();
 
         // Draw the image within the clipping path
-        ctx.drawImage(
-          i % 2 === 0 ? sinaImage : cristinaImage,
-          centerX - renderWidth / 2,
-          centerY - renderHeight / 2,
-          renderWidth,
-          renderHeight
-        );
+        const imageIndex = i % coinImages.length;
+        if (coinImages[imageIndex]) {
+          ctx.drawImage(
+            coinImages[imageIndex],
+            centerX - renderWidth / 2,
+            centerY - renderHeight / 2,
+            renderWidth,
+            renderHeight
+          );
+        }
 
         // Restore the context
         ctx.restore();
