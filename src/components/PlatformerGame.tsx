@@ -11,7 +11,7 @@ import { getExtensionURL } from "@/utils/chromeUtils";
 
 interface PlatformerGameProps {
   onReturn: () => void;
-  timerState: TimerState;
+  timerState?: TimerState;
   onStart?: () => void;
   onPause?: () => void;
 }
@@ -118,11 +118,11 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
   useEffect(() => {
     setGameStarted(true);
     resetGame();
-    if (onStart && !timerState.isRunning) {
+    if (onStart && timerState && !timerState.isRunning) {
       onStart();
     }
     return () => {
-      if (onPause && timerState.isRunning) {
+      if (onPause && timerState && timerState.isRunning) {
         onPause();
       }
     };
@@ -182,7 +182,7 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
     drawObstacles(ctx, obstaclesRef.current, gameState.cameraOffsetX);
     drawCollectibles(ctx, coinsRef.current, gameState.cameraOffsetX);
     drawCharacter(ctx, characterRef.current);
-    drawUI(ctx, gameState, timerState.timeRemaining, timerState.mode);
+    drawUI(ctx, gameState, timerState?.timeRemaining || 0, timerState?.mode || 'focus');
     
     if (gameState.gameOver) {
       drawGameOver(ctx, gameState.score);
@@ -241,7 +241,7 @@ const PlatformerGame: React.FC<PlatformerGameProps> = ({
             Play Again
           </button> : null}
         <button onClick={handleReturn} className="bg-white text-focus-purple border border-focus-purple px-6 py-2 rounded-full hover:bg-focus-purple hover:text-white transition-colors">
-          Return to Timer
+          Exit Game
         </button>
       </div>
     </div>
